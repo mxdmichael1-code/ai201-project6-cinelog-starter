@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from app import create_app, db
@@ -111,3 +112,29 @@ def test_remove_from_watchlist_missing_entry_raises(app, sample_user, sample_fil
     """Removing a film that is not saved should raise NotInWatchlistError."""
     with app.app_context(), pytest.raises(NotInWatchlistError):
         remove_from_watchlist(sample_user, sample_film)
+
+
+def test_get_watchlist_returns_newest_first(app, sample_user):
+    """The most recently added film should appear first."""
+    with app.app_context():
+        older_film = Film(title="Alien", year=1979)
+        newer_film = Film(title="Blade Runner", year=1982)
+        db.session.add_all([older_film, newer_film])
+        db.session.commit()
+
+        older_entry = WatchlistEntry(
+            user_id=sample_user,
+            film_id=older_film.id,
+            date_added=datetime.now(timezone.utc) - timedelta(days=5),
+        )
+        newer_entry = WatchlistEntry(
+            user_id=sample_user,
+            film_id=newer_film.id,
+            date_added=datetime.now(timezone.utc),
+        )
+        db.session.add_all([older_entry, newer_entry])
+        db.session.commit()
+
+        titles = [film["title"] for film in get_watchlist(sample_user)]
+
+        assert titles == ["Blade Runner", "Alien"]

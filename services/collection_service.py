@@ -13,6 +13,9 @@ class FilmNotFoundError(Exception):
     """Raised when a film_id does not exist in the database."""
     pass
 
+class AlreadyInWatchlistError(Exception):
+    """Raised when a film is already in the user's watchlist."""
+    pass
 
 class AlreadyInCollectionError(Exception):
     """Raised when a film is already in the user's collection."""
@@ -21,6 +24,10 @@ class AlreadyInCollectionError(Exception):
 
 class NotInCollectionError(Exception):
     """Raised when trying to remove a film that isn't in the collection."""
+    pass
+
+class NotInWatchlistError(Exception):
+    """Raised when trying to remove a film that isn't in the watchlist."""
     pass
 
 
